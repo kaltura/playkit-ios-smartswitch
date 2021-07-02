@@ -27,6 +27,8 @@ import Foundation
     
     @objc public var optionalParams: [String: String]?
     
+    @objc public var timeout: TimeInterval = 10
+    
     //SmartSwitch server url
     var smartSwitchUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
     
@@ -45,6 +47,12 @@ import Foundation
     @discardableResult
     @nonobjc public func set(optionalParams: [String: String]) -> Self {
         self.optionalParams = optionalParams
+        return self
+    }
+    
+    @discardableResult
+    @nonobjc public func set(timeout: TimeInterval) -> Self {
+        self.timeout = timeout
         return self
     }
 }

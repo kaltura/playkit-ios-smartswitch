@@ -72,6 +72,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         
         request.set(method: .get)
         request.set(responseSerializer: JSONSerializer())
+        request.set(timeout: self.config.timeout)
         
         request.setParam(key: "accountCode", value: self.config.accountCode)
         request.setParam(key: "resource", value: originalURL.absoluteString)
