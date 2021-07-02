@@ -21,5 +21,5 @@ Pod::Spec.new do |s|
   
   s.dependency 'PlayKit/AnalyticsCommon', '~> 3.19'
   s.dependency 'KalturaPlayer/Interceptor'
-
+  s.dependency 'KalturaNetKit'
 end
