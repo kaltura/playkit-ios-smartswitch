@@ -62,7 +62,17 @@ import KalturaNetKit
 
 extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     
-    private func getOrderedCDN(originalURL: URL, completion: @escaping (_ url: String?, _ error: Error?) -> Void) {
+    private struct SmartSwitcCDNItem {
+        let url: String
+        let cdnCode: String
+        
+        init(url: String, cdnCode: String) {
+            self.url = url
+            self.cdnCode = cdnCode
+        }
+    }
+    
+    private func getOrderedCDN(originalURL: URL, completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
         guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: self.config.smartSwitchUrl,
                                                                          service: nil,
                                                                          action: nil) else {
@@ -102,8 +112,10 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
                 
                 if let firstItem = sortedListByCDNRank.first,
                    let item = list.first(where: { return $0["\(firstItem)"] != nil }),
-                   let url = item["\(firstItem)"]?["URL"] as? String {
-                    completion(url, nil)
+                   let cdn = item["\(firstItem)"] as? [String: Any],
+                   let url = cdn["URL"] as? String,
+                   let cdnCode = cdn["CDN_CODE"] as? String {
+                    completion(SmartSwitcCDNItem(url: url, cdnCode: cdnCode), nil)
                 } else {
                     completion(nil, nil)
                 }
@@ -132,11 +144,20 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
             if let source = sources.first,
                let contentURL = source.contentUrl {
                 
-                self?.getOrderedCDN(originalURL: contentURL, completion: { preferredURL, error in
+                self?.getOrderedCDN(originalURL: contentURL, completion: { cdn, error in
                     
                     DispatchQueue.main.async {
-                        if let preferredURL = preferredURL, !preferredURL.isEmpty, let url = URL(string: preferredURL)  {
+                        
+                        if let preferredURL = cdn?.url,
+                           !preferredURL.isEmpty,
+                           let url = URL(string: preferredURL),
+                           let cdnCode = cdn?.cdnCode {
+                            
                             source.contentUrl = url
+                            
+                            if let reportCDN = self?.config.reportSelectedCDNCode, reportCDN == true {
+                                self?.messageBus?.post(PlayerEvent.CDNSwitched(cdnCode: cdnCode))
+                            }
                         } else {
                             if let error = error as NSError? {
                                 PKLog.error("Smart Switch Error: " + error.localizedDescription)

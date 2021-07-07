@@ -29,6 +29,8 @@ import Foundation
     
     @objc public var timeout: TimeInterval = 10
     
+    @objc public var reportSelectedCDNCode: Bool = false
+    
     //SmartSwitch server url
     var smartSwitchUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
     
