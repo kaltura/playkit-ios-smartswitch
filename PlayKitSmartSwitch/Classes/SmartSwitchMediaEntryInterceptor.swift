@@ -103,22 +103,13 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
             }
             
             if let response = response.data as? [String: AnyObject],
-               let list = response["smartSwitch"]?["CDNList"] as? [[String: AnyObject]] {
-                
-                let sortedListByCDNRank: [Int] = list.compactMap {
-                    if let key = $0.keys.first { return Int(key) }
-                    return nil
-                }.sorted()
-                
-                if let firstItem = sortedListByCDNRank.first,
-                   let item = list.first(where: { return $0["\(firstItem)"] != nil }),
-                   let cdn = item["\(firstItem)"] as? [String: Any],
-                   let url = cdn["URL"] as? String,
-                   let cdnCode = cdn["CDN_CODE"] as? String {
-                    completion(SmartSwitcCDNItem(url: url, cdnCode: cdnCode), nil)
-                } else {
-                    completion(nil, nil)
-                }
+               let list = response["smartSwitch"]?["CDNList"] as? [[String: AnyObject]],
+               let firstItem = list.first,
+               let smartSwitchItemKey = firstItem.keys.first,
+               let smartSwitchItem = firstItem[smartSwitchItemKey],
+               let url = smartSwitchItem["URL"] as? String,
+               let cdnCode = smartSwitchItem["CDN_CODE"] as? String {
+                completion(SmartSwitcCDNItem(url: url, cdnCode: cdnCode), nil)
             } else {
                 completion(nil, nil)
             }
@@ -130,7 +121,10 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     
     @objc public func apply(on mediaEntry: PKMediaEntry, completion: @escaping () -> Void) {
         
-        guard let sources = mediaEntry.sources, !sources.isEmpty else {
+        guard let sources = mediaEntry.sources,
+              !sources.isEmpty,
+              let source = sources.first,
+              let contentURL = source.contentUrl else {
             PKLog.error("Missing sources in provided MediaEntry: \(mediaEntry.id)")
             self.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.invalidMediaEntry))
             completion()
@@ -141,44 +135,34 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         
         DispatchQueue.global(qos: .default).async { [weak self] in
             
-            if let source = sources.first,
-               let contentURL = source.contentUrl {
+            self?.getOrderedCDN(originalURL: contentURL, completion: { cdn, error in
                 
-                self?.getOrderedCDN(originalURL: contentURL, completion: { cdn, error in
-                    
-                    DispatchQueue.main.async {
-                        
-                        if let preferredURL = cdn?.url,
-                           !preferredURL.isEmpty,
-                           let url = URL(string: preferredURL),
-                           let cdnCode = cdn?.cdnCode {
-                            
-                            source.contentUrl = url
-                            
-                            if let reportCDN = self?.config.reportSelectedCDNCode, reportCDN == true {
-                                self?.messageBus?.post(PlayerEvent.CDNSwitched(cdnCode: cdnCode))
-                            }
-                        } else {
-                            if let error = error as NSError? {
-                                PKLog.error("Smart Switch Error: " + error.localizedDescription)
-                                self?.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.smartSwitchError(error.code,
-                                                                                                                             error.localizedDescription)))
-                            } else {
-                                PKLog.error("Smart Switch cdnbalancer returned incorrect URL")
-                                self?.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.smartSwitchBadUrl))
-                            }
-                        }
-                        
-                        self?.completionHandler?()
-                    }
-                })
-            } else {
                 DispatchQueue.main.async {
-                    PKLog.error("Missed MediaEntry source.contentUrl or SmartLib stream URL is incorrect")
-                    self?.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.unknown))
+                    
+                    if let preferredURL = cdn?.url,
+                       !preferredURL.isEmpty,
+                       let url = URL(string: preferredURL),
+                       let cdnCode = cdn?.cdnCode {
+                        
+                        source.contentUrl = url
+                        
+                        if let reportCDN = self?.config.reportSelectedCDNCode, reportCDN == true {
+                            self?.messageBus?.post(InterceptorEvent.CDNSwitched(cdnCode: cdnCode))
+                        }
+                    } else {
+                        if let error = error as NSError? {
+                            PKLog.error("Smart Switch request error: " + error.localizedDescription)
+                            self?.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.smartSwitchError(error.code,
+                                                                                                                         error.localizedDescription)))
+                        } else {
+                            PKLog.error("Smart Switch cdnbalancer: missing content URL or CDN code")
+                            self?.messageBus?.post(SmartSwitchEvent.Error(error: SmartSwitchPluginError.smartSwitchBadUrl))
+                        }
+                    }
+                    
                     self?.completionHandler?()
                 }
-            }
+            })
         }
     }
     
