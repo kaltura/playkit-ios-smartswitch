@@ -31,6 +31,9 @@ import Foundation
     
     @objc public var reportSelectedCDNCode: Bool = false
     
+    //SmartSwitch server url
+    @objc public var smartSwitchUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
+    
     @discardableResult
     @nonobjc public func set(accountCode: String) -> Self {
         self.accountCode = accountCode
@@ -54,4 +57,11 @@ import Foundation
         self.timeout = timeout
         return self
     }
+    
+    @discardableResult
+    @nonobjc public func set(smartSwitchUrl: String) -> Self {
+        self.smartSwitchUrl = smartSwitchUrl
+        return self
+    }
+    
 }

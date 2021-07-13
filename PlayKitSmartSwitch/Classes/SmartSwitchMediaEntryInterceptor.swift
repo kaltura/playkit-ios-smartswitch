@@ -62,9 +62,6 @@ import KalturaNetKit
 
 extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     
-    //SmartSwitch server url
-    static private let smartSwitchEndpointUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
-    
     private struct SmartSwitcCDNItem {
         let url: String
         let cdnCode: String
@@ -76,7 +73,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     }
     
     private func getOrderedCDN(originalURL: URL, completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
-        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: SmartSwitchMediaEntryInterceptor.smartSwitchEndpointUrl,
+        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: self.config.smartSwitchUrl,
                                                                          service: nil,
                                                                          action: nil) else {
             completion(nil, nil)
@@ -138,14 +135,14 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         
         DispatchQueue.global(qos: .default).async { [weak self] in
             
-            self?.getOrderedCDN(originalURL: contentURL, completion: { cdn, error in
+            self?.getOrderedCDN(originalURL: contentURL, completion: { smartSwitcCDNItem, error in
                 
                 DispatchQueue.main.async {
                     
-                    if let preferredURL = cdn?.url,
+                    if let preferredURL = smartSwitcCDNItem?.url,
                        !preferredURL.isEmpty,
                        let url = URL(string: preferredURL),
-                       let cdnCode = cdn?.cdnCode {
+                       let cdnCode = smartSwitcCDNItem?.cdnCode {
                         
                         source.contentUrl = url
                         
