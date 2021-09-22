@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   
   s.source_files = 'PlayKitSmartSwitch/Classes/**/*'
   
-  s.dependency 'PlayKit/AnalyticsCommon', '~> 3.19'
+  s.dependency 'PlayKit/AnalyticsCommon', '~> 3.22'
   s.dependency 'KalturaPlayer/Interceptor'
-  s.dependency 'KalturaNetKit'
+  s.dependency 'KalturaNetKit', '~> 1.5.1'
 end
