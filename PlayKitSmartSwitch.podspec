@@ -1,10 +1,11 @@
 Pod::Spec.new do |s|
   s.name             = 'PlayKitSmartSwitch'
-  s.version          = '0.0.1'
+  s.version          = '1.0.0'
   s.summary          = 'Kaltura PlayKit plugin for the NPAW Smart Switch.'
   
   s.description      = <<-DESC
   Kaltura PlayKit plugin for the NPAW Smart Switch.
+  https://npaw.com/cdn-balancer/
   DESC
   
   s.homepage         = 'https://github.com/kaltura/playkit-ios-smartSwitch'
@@ -22,4 +23,11 @@ Pod::Spec.new do |s|
   s.dependency 'PlayKit/AnalyticsCommon', '~> 3.22'
   s.dependency 'KalturaPlayer/Interceptor'
   s.dependency 'KalturaNetKit', '~> 1.5.1'
+  
+  s.xcconfig = {
+### The following is required for Xcode 12 (https://stackoverflow.com/questions/63607158/xcode-12-building-for-ios-simulator-but-linking-in-object-file-built-for-ios)
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
+    'EXCLUDED_ARCHS[sdk=appletvsimulator*]' => 'arm64'
+  }
+  
 end
