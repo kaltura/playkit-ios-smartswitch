@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/kaltura/playkit-ios-smartSwitch'
   s.license          = { :type => 'AGPLv3', :file => 'LICENSE' }
   s.author           = { 'Kaltura' => 'community@kaltura.com' }
-  s.source           = { :git => 'https://github.com/kaltura/playkit-ios-smartSwitch.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/kaltura/playkit-ios-smartSwitch.git', :tag => 'v' + s.version.to_s }
   
   s.swift_version     = '5.0'
   
