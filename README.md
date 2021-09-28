@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/cocoapods/l/PlayKitSmartSwitch.svg?style=flat)](https://cocoapods.org/pods/PlayKitSmartSwitch)
 [![Platform](https://img.shields.io/cocoapods/p/PlayKitSmartSwitch.svg?style=flat)](https://cocoapods.org/pods/PlayKitSmartSwitch)
 [![CI Status](https://travis-ci.com/kaltura/playkit-ios-smartswitch.svg?branch=develop)](https://travis-ci.com/github/kaltura/playkit-ios-smartswitch)
-https://github.com/kaltura/
+
 Kaltura Player iOS plugin for NPAW Smart Switch
 
 ## Example
