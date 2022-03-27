@@ -21,7 +21,11 @@ import Foundation
     // Your YOUBORA account code.
     @objc public var accountCode: String = ""
     
+    // The application code configured in the UI
+    @objc public var application: String?
+    
     // CDN group configured to select a subset of configured CDNs.
+    // If not set, the API will use the first configuration as the default
     // vod, live1, live2
     @objc public var originCode: String = ""
     
@@ -32,11 +36,17 @@ import Foundation
     @objc public var reportSelectedCDNCode: Bool = false
     
     //SmartSwitch server url
-    @objc public var smartSwitchUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
+    @objc public var smartSwitchUrl: String = "https://api.gbnpaw.com/{accountCode}/{application}/decision"
     
     @discardableResult
     @nonobjc public func set(accountCode: String) -> Self {
         self.accountCode = accountCode
+        return self
+    }
+    
+    @discardableResult
+    @nonobjc public func set(application: String) -> Self {
+        self.application = application
         return self
     }
     

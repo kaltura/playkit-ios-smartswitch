@@ -72,8 +72,20 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         }
     }
     
-    private func getOrderedCDN(originalURL: URL, completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
-        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: self.config.smartSwitchUrl,
+    private func getOrderedCDN(originalURL: URL,
+                               completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
+        
+        var serverURL = self.config.smartSwitchUrl
+        
+        serverURL = serverURL.replacingOccurrences(of: "{accountCode}", with: self.config.accountCode)
+        
+        if let application = self.config.application, !application.isEmpty {
+            serverURL = serverURL.replacingOccurrences(of: "{application}", with: application)
+        } else {
+            serverURL = serverURL.replacingOccurrences(of: "{application}/", with: "")
+        }
+        
+        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: serverURL,
                                                                          service: nil,
                                                                          action: nil) else {
             completion(nil, nil)
@@ -84,7 +96,6 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         request.set(responseSerializer: JSONSerializer())
         request.set(timeout: self.config.timeout)
         
-        request.setParam(key: "accountCode", value: self.config.accountCode)
         request.setParam(key: "resource", value: originalURL.absoluteString)
         request.setParam(key: "origincode", value: self.config.originCode)
         
