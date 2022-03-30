@@ -62,7 +62,7 @@ import KalturaNetKit
 
 extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     
-    private struct SmartSwitcCDNItem {
+    private struct Provider {
         let url: String
         let cdnCode: String
         
@@ -73,14 +73,15 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     }
     
     private func getOrderedCDN(originalURL: URL,
-                               completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
+                               completion: @escaping (_ cdn: Provider?, _ error: Error?) -> Void) {
         
         var serverURL = self.config.smartSwitchUrl
         
         serverURL = serverURL.replacingOccurrences(of: "{accountCode}", with: self.config.accountCode)
         
         if let application = self.config.application, !application.isEmpty {
-            serverURL = serverURL.replacingOccurrences(of: "{application}", with: application)
+            serverURL = serverURL.replacingOccurrences(of: "{application}",
+                                                       with: application.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowedCharacterSet) ?? application)
         } else {
             serverURL = serverURL.replacingOccurrences(of: "{application}/", with: "")
         }
@@ -88,6 +89,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: serverURL,
                                                                          service: nil,
                                                                          action: nil) else {
+            PKLog.error("Can not create get ordered CDN request.")
             completion(nil, nil)
             return
         }
@@ -97,7 +99,10 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         request.set(timeout: self.config.timeout)
         
         request.setParam(key: "resource", value: originalURL.absoluteString)
-        request.setParam(key: "origincode", value: self.config.originCode)
+        
+        if let originCode = self.config.originCode {
+            request.setParam(key: "origincode", value: originCode)
+        }
         
         if let parameters = self.config.optionalParams {
             parameters.forEach { (key: String, value: String) in
@@ -114,13 +119,11 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
             }
             
             if let response = response.data as? [String: AnyObject],
-               let list = response["smartSwitch"]?["CDNList"] as? [[String: AnyObject]],
+               let list = response["providers"] as? [[String: AnyObject]],
                let firstItem = list.first,
-               let smartSwitchItemKey = firstItem.keys.first,
-               let smartSwitchItem = firstItem[smartSwitchItemKey],
-               let url = smartSwitchItem["URL"] as? String,
-               let cdnCode = smartSwitchItem["CDN_CODE"] as? String {
-                completion(SmartSwitcCDNItem(url: url, cdnCode: cdnCode), nil)
+               let url = firstItem["url"] as? String,
+               let cdnCode = firstItem["provider"] as? String {
+                completion(Provider(url: url, cdnCode: cdnCode), nil)
             } else {
                 completion(nil, nil)
             }
