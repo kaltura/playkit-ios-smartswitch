@@ -27,15 +27,27 @@ import Foundation
     // CDN group configured to select a subset of configured CDNs.
     // If not set, the API will use the first configuration as the default
     // vod, live1, live2
-    @objc public var originCode: String = ""
+    @objc public var originCode: String?
     
+    /*
+    // Set any of these additional parameters:
+     ip,
+     userAgent,
+     live,
+     protocol,
+     extended,
+     extended,
+     nva (as a String),
+     nvb (as a String),
+     token
+     */
     @objc public var optionalParams: [String: String]?
     
     @objc public var timeout: TimeInterval = 10
     
     @objc public var reportSelectedCDNCode: Bool = false
     
-    //SmartSwitch server url
+    // SmartSwitch server url
     @objc public var smartSwitchUrl: String = "https://api.gbnpaw.com/{accountCode}/{application}/decision"
     
     @discardableResult
