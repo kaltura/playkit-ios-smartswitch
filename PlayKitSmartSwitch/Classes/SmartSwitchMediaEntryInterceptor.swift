@@ -83,7 +83,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
             serverURL = serverURL.replacingOccurrences(of: "{application}",
                                                        with: application.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowedCharacterSet) ?? application)
         } else {
-            serverURL = serverURL.replacingOccurrences(of: "{application}/", with: "default")
+            serverURL = serverURL.replacingOccurrences(of: "{application}/", with: "default/")
         }
         
         guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: serverURL,
