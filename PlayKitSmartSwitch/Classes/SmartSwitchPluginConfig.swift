@@ -47,8 +47,8 @@ import Foundation
     
     @objc public var reportSelectedCDNCode: Bool = false
     
-    // SmartSwitch server url
-    @objc public var smartSwitchUrl: String = "https://api.gbnpaw.com/{accountCode}/{application}/decision"
+    // SmartSwitch domain url default: https://api.gbnpaw.com
+    @objc public var domainUrl: String = "https://api.gbnpaw.com/{accountCode}/{application}/decision"
     
     @discardableResult
     @nonobjc public func set(accountCode: String) -> Self {
@@ -81,8 +81,8 @@ import Foundation
     }
     
     @discardableResult
-    @nonobjc public func set(smartSwitchUrl: String) -> Self {
-        self.smartSwitchUrl = smartSwitchUrl
+    @nonobjc public func set(domainUrl: String) -> Self {
+        self.domainUrl = domainUrl
         return self
     }
     
