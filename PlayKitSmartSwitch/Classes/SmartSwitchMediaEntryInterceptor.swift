@@ -75,7 +75,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     private func getOrderedCDN(originalURL: URL,
                                completion: @escaping (_ cdn: Provider?, _ error: Error?) -> Void) {
         
-        var serverURL = self.config.smartSwitchUrl
+        var serverURL = self.config.domainUrl
         
         serverURL = serverURL.replacingOccurrences(of: "{accountCode}", with: self.config.accountCode)
         
