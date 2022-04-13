@@ -27,6 +27,7 @@ import Foundation
     /*
     // Set any of these additional parameters:
      ip,
+     originCode,
      userAgent,
      live,
      protocol,
