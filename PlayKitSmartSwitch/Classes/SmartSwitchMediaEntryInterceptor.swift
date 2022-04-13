@@ -83,7 +83,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
             serverURL = serverURL.replacingOccurrences(of: "{application}",
                                                        with: application.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowedCharacterSet) ?? application)
         } else {
-            serverURL = serverURL.replacingOccurrences(of: "{application}/", with: "default/")
+            serverURL = serverURL.replacingOccurrences(of: "{application}", with: "default")
         }
         
         guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: serverURL,
@@ -100,10 +100,6 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         
         request.setParam(key: "resource", value: originalURL.absoluteString)
         
-        if let originCode = self.config.originCode {
-            request.setParam(key: "origincode", value: originCode)
-        }
-        
         if let parameters = self.config.optionalParams {
             parameters.forEach { (key: String, value: String) in
                 request.setParam(key: key, value: value)
@@ -113,7 +109,20 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         request.set { (response: Response) in
             PKLog.debug("Response:\nStatus Code: \(response.statusCode)\nError: \(response.error?.localizedDescription ?? "")\nData: \(response.data ?? "")")
             
-            if let error = response.error {
+            if let error = response.error as? NSError {
+                
+                if let response = response.data as? [String: AnyObject],
+                   let messages = response["messages"] as? [[String: AnyObject]],
+                   let message = messages.first?["message"] as? String,
+                   let reason = messages.first?["code"] as? String {
+                    
+                    let userInfo = [NSLocalizedDescriptionKey: message, NSLocalizedFailureReasonErrorKey: reason]
+                    let nsError = NSError(domain: "com.PlayKit.SmartSwitch",
+                                          code: error.code,
+                                          userInfo: userInfo)
+                    completion(nil, nsError)
+                }
+                
                 completion(nil, error)
                 return
             }
