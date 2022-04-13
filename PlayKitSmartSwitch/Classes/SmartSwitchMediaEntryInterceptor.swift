@@ -121,6 +121,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
                                           code: error.code,
                                           userInfo: userInfo)
                     completion(nil, nsError)
+                    return
                 }
                 
                 completion(nil, error)
