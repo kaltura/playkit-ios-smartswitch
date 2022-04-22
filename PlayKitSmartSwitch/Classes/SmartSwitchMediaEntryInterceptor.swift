@@ -25,6 +25,8 @@ import KalturaNetKit
     
     var completionHandler: (() -> Void)?
     
+    private var serverURL = "{domainUrl}/{accountCode}/{application}/decision"
+    
     public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus) throws {
         guard let config = pluginConfig as? SmartSwitchConfig else {
             PKLog.error("Missing plugin config")
@@ -75,8 +77,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     private func getOrderedCDN(originalURL: URL,
                                completion: @escaping (_ cdn: Provider?, _ error: Error?) -> Void) {
         
-        var serverURL = self.config.domainUrl
-        
+        serverURL = serverURL.replacingOccurrences(of: "{domainUrl}", with: self.config.domainUrl)
         serverURL = serverURL.replacingOccurrences(of: "{accountCode}", with: self.config.accountCode)
         
         if let application = self.config.application, !application.isEmpty {
