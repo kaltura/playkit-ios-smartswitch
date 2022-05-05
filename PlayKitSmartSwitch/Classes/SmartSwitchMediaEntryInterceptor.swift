@@ -91,7 +91,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
                                                                          service: nil,
                                                                          action: nil) else {
             PKLog.error("Can not create get ordered CDN request.")
-            completion(nil, nil)
+            completion(nil, SmartSwitchPluginError.pluginInternalError)
             return
         }
         
@@ -118,7 +118,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
                    let reason = messages.first?["code"] as? String {
                     
                     let userInfo = [NSLocalizedDescriptionKey: message, NSLocalizedFailureReasonErrorKey: reason]
-                    let nsError = NSError(domain: "com.PlayKit.SmartSwitch",
+                    let nsError = NSError(domain: SmartSwitchPluginError.domain,
                                           code: error.code,
                                           userInfo: userInfo)
                     completion(nil, nsError)
@@ -136,7 +136,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
                let cdnCode = firstItem["provider"] as? String {
                 completion(Provider(url: url, cdnCode: cdnCode), nil)
             } else {
-                completion(nil, nil)
+                completion(nil, SmartSwitchPluginError.pluginInternalError)
             }
         }
         

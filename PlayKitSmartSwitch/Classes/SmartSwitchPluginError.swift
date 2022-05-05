@@ -22,15 +22,17 @@ enum SmartSwitchPluginError: PKError {
     case smartSwitchError(Int, String)
     case smartSwitchBadUrl
     case invalidMediaEntry
+    case pluginInternalError
     case unknown
     
-    static let domain = "com.kaltura.playkit.error.smartswitch"
+    static let domain = "com.kaltura.playkit.smartswitch"
     
     var code: Int {
         switch self {
         case .smartSwitchError: return PKErrorCode.smartSwitchPluginInvalidSmartLibEntry
         case .smartSwitchBadUrl: return PKErrorCode.smartSwitchPluginInvalidStreamURL
         case .invalidMediaEntry: return PKErrorCode.smartSwitchPluginInvalidMediaEntry
+        case .pluginInternalError: return PKErrorCode.smartSwitchInternalError
         case .unknown: return PKErrorCode.smartSwitchUnknownError
         }
     }
@@ -40,6 +42,7 @@ enum SmartSwitchPluginError: PKError {
         case .smartSwitchError(_, let errorMessage): return errorMessage
         case .smartSwitchBadUrl: return "Smart Switch stream URL is empty."
         case .invalidMediaEntry: return "Provided MediaEntry can not be modified. Check MediaEntry Sources."
+        case .pluginInternalError: return "Smart Switch Plugin internal error."
         case .unknown: return "Smart Switch Plugin unknown error."
         }
     }
@@ -63,4 +66,5 @@ extension PKErrorCode {
     @objc(SmartSwitchPluginInvalidMediaEntry) public static let smartSwitchPluginInvalidMediaEntry = 10001
     @objc(SmartSwitchPluginInvalidSmartLibEntry) public static let smartSwitchPluginInvalidSmartLibEntry = 10002
     @objc(SmartSwitchPluginInvalidStreamURL) public static let smartSwitchPluginInvalidStreamURL = 10003
+    @objc(SmartSwitchInternalError) public static let smartSwitchInternalError = 10004
 }
