@@ -25,6 +25,8 @@ import KalturaNetKit
     
     var completionHandler: (() -> Void)?
     
+    private var serverURL = "{domainUrl}/{accountCode}/{application}/decision"
+    
     public required init(player: Player, pluginConfig: Any?, messageBus: MessageBus) throws {
         guard let config = pluginConfig as? SmartSwitchConfig else {
             PKLog.error("Missing plugin config")
@@ -62,7 +64,7 @@ import KalturaNetKit
 
 extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
     
-    private struct SmartSwitcCDNItem {
+    private struct Provider {
         let url: String
         let cdnCode: String
         
@@ -72,11 +74,24 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         }
     }
     
-    private func getOrderedCDN(originalURL: URL, completion: @escaping (_ cdn: SmartSwitcCDNItem?, _ error: Error?) -> Void) {
-        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: self.config.smartSwitchUrl,
+    private func getOrderedCDN(originalURL: URL,
+                               completion: @escaping (_ cdn: Provider?, _ error: Error?) -> Void) {
+        
+        serverURL = serverURL.replacingOccurrences(of: "{domainUrl}", with: self.config.domainUrl)
+        serverURL = serverURL.replacingOccurrences(of: "{accountCode}", with: self.config.accountCode)
+        
+        if let application = self.config.application, !application.isEmpty {
+            serverURL = serverURL.replacingOccurrences(of: "{application}",
+                                                       with: application.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowedCharacterSet) ?? application)
+        } else {
+            serverURL = serverURL.replacingOccurrences(of: "{application}", with: "default")
+        }
+        
+        guard let request: KalturaRequestBuilder = KalturaRequestBuilder(url: serverURL,
                                                                          service: nil,
                                                                          action: nil) else {
-            completion(nil, nil)
+            PKLog.error("Can not create get ordered CDN request.")
+            completion(nil, SmartSwitchPluginError.pluginInternalError)
             return
         }
         
@@ -84,9 +99,7 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         request.set(responseSerializer: JSONSerializer())
         request.set(timeout: self.config.timeout)
         
-        request.setParam(key: "accountCode", value: self.config.accountCode)
         request.setParam(key: "resource", value: originalURL.absoluteString)
-        request.setParam(key: "origincode", value: self.config.originCode)
         
         if let parameters = self.config.optionalParams {
             parameters.forEach { (key: String, value: String) in
@@ -97,21 +110,33 @@ extension SmartSwitchMediaEntryInterceptor: PKMediaEntryInterceptor {
         request.set { (response: Response) in
             PKLog.debug("Response:\nStatus Code: \(response.statusCode)\nError: \(response.error?.localizedDescription ?? "")\nData: \(response.data ?? "")")
             
-            if let error = response.error {
+            if let error = response.error as? NSError {
+                
+                if let response = response.data as? [String: AnyObject],
+                   let messages = response["messages"] as? [[String: AnyObject]],
+                   let message = messages.first?["message"] as? String,
+                   let reason = messages.first?["code"] as? String {
+                    
+                    let userInfo = [NSLocalizedDescriptionKey: message, NSLocalizedFailureReasonErrorKey: reason]
+                    let nsError = NSError(domain: SmartSwitchPluginError.domain,
+                                          code: error.code,
+                                          userInfo: userInfo)
+                    completion(nil, nsError)
+                    return
+                }
+                
                 completion(nil, error)
                 return
             }
             
             if let response = response.data as? [String: AnyObject],
-               let list = response["smartSwitch"]?["CDNList"] as? [[String: AnyObject]],
+               let list = response["providers"] as? [[String: AnyObject]],
                let firstItem = list.first,
-               let smartSwitchItemKey = firstItem.keys.first,
-               let smartSwitchItem = firstItem[smartSwitchItemKey],
-               let url = smartSwitchItem["URL"] as? String,
-               let cdnCode = smartSwitchItem["CDN_CODE"] as? String {
-                completion(SmartSwitcCDNItem(url: url, cdnCode: cdnCode), nil)
+               let url = firstItem["url"] as? String,
+               let cdnCode = firstItem["provider"] as? String {
+                completion(Provider(url: url, cdnCode: cdnCode), nil)
             } else {
-                completion(nil, nil)
+                completion(nil, SmartSwitchPluginError.pluginInternalError)
             }
         }
         

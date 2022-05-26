@@ -21,18 +21,29 @@ import Foundation
     // Your YOUBORA account code.
     @objc public var accountCode: String = ""
     
-    // CDN group configured to select a subset of configured CDNs.
-    // vod, live1, live2
-    @objc public var originCode: String = ""
+    // The application code configured in the UI
+    @objc public var application: String?
     
+    /*
+    // Set any of these additional parameters:
+     ip,
+     originCode,
+     userAgent,
+     live,
+     protocol,
+     extended,
+     nva (as a String),
+     nvb (as a String),
+     token
+     */
     @objc public var optionalParams: [String: String]?
     
     @objc public var timeout: TimeInterval = 10
     
     @objc public var reportSelectedCDNCode: Bool = false
     
-    //SmartSwitch server url
-    @objc public var smartSwitchUrl: String = "http://cdnbalancer.youbora.com/orderedcdn"
+    // SmartSwitch domain url default: https://api.gbnpaw.com
+    @objc public var domainUrl: String = "https://api.gbnpaw.com"
     
     @discardableResult
     @nonobjc public func set(accountCode: String) -> Self {
@@ -41,8 +52,8 @@ import Foundation
     }
     
     @discardableResult
-    @nonobjc public func set(originCode: String) -> Self {
-        self.originCode = originCode
+    @nonobjc public func set(application: String) -> Self {
+        self.application = application
         return self
     }
     
@@ -59,8 +70,8 @@ import Foundation
     }
     
     @discardableResult
-    @nonobjc public func set(smartSwitchUrl: String) -> Self {
-        self.smartSwitchUrl = smartSwitchUrl
+    @nonobjc public func set(domainUrl: String) -> Self {
+        self.domainUrl = domainUrl
         return self
     }
     
