@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'PlayKitSmartSwitch'
-  s.version          = '1.1.0'
+  s.version          = '1.1.1'
   s.summary          = 'Kaltura PlayKit plugin for the NPAW Smart Switch.'
   
   s.description      = <<-DESC
