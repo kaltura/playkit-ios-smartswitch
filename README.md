@@ -1,9 +1,9 @@
 # PlayKitSmartSwitch
-
+![Swift 3.0+](https://img.shields.io/badge/Swift-3.0+-orange.svg)
+[![CI Status](https://github.com/kaltura/playkit-ios-smartswitch/actions/workflows/ci.yml/badge.svg)](https://github.com/kaltura/playkit-ios-smartswitch/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/cocoapods/v/PlayKitSmartSwitch.svg?style=flat)](https://cocoapods.org/pods/PlayKitSmartSwitch)
 [![License](https://img.shields.io/cocoapods/l/PlayKitSmartSwitch.svg?style=flat)](https://cocoapods.org/pods/PlayKitSmartSwitch)
 [![Platform](https://img.shields.io/cocoapods/p/PlayKitSmartSwitch.svg?style=flat)](https://cocoapods.org/pods/PlayKitSmartSwitch)
-[![CI Status](https://travis-ci.com/kaltura/playkit-ios-smartswitch.svg?branch=develop)](https://travis-ci.com/github/kaltura/playkit-ios-smartswitch)
 
 Kaltura Player iOS plugin for NPAW Smart Switch
 
